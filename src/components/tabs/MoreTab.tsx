@@ -3,8 +3,14 @@ import { Button } from "@/components/ui/button";
 import { 
   Ambulance, Droplets, CreditCard, Heart, FileText, 
   History, Settings, HelpCircle, Shield, Bell, 
-  User, ChevronRight, LogOut, Star
+  User, ChevronRight, LogOut, Star, Phone
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+
+interface MoreTabProps {
+  onLoginClick: () => void;
+  onProfileClick: () => void;
+}
 
 const quickActions = [
   { icon: Ambulance, label: "Book Ambulance", color: "text-destructive", bg: "bg-destructive/10" },
@@ -22,24 +28,53 @@ const menuItems = [
   { icon: Settings, label: "Settings" },
 ];
 
-const MoreTab = () => {
+const MoreTab = ({ onLoginClick, onProfileClick }: MoreTabProps) => {
+  const { user, signOut, loading } = useAuth();
+
+  const handleSignOut = async () => {
+    await signOut();
+  };
+
   return (
     <div className="space-y-6">
       {/* Profile Card */}
       <Card variant="elevated">
         <CardContent className="p-4">
-          <div className="flex items-center gap-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-              <User className="h-8 w-8 text-primary" />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-bold text-foreground text-lg">Guest User</h3>
-              <p className="text-sm text-muted-foreground">Sign in for personalized experience</p>
-            </div>
-            <ChevronRight className="h-5 w-5 text-muted-foreground" />
-          </div>
+          {user ? (
+            <button onClick={onProfileClick} className="w-full flex items-center gap-4 text-left">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                <User className="h-8 w-8 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-foreground text-lg">
+                  {user.phone || 'User'}
+                </h3>
+                <p className="text-sm text-muted-foreground">Tap to view profile</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </button>
+          ) : (
+            <button onClick={onLoginClick} className="w-full flex items-center gap-4 text-left">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                <User className="h-8 w-8 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-bold text-foreground text-lg">Guest User</h3>
+                <p className="text-sm text-muted-foreground">Sign in for personalized experience</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </button>
+          )}
         </CardContent>
       </Card>
+
+      {/* Login Button for guests */}
+      {!user && (
+        <Button onClick={onLoginClick} className="w-full" size="lg">
+          <Phone className="h-5 w-5" />
+          Login with Phone Number
+        </Button>
+      )}
 
       {/* Quick Actions */}
       <div className="grid grid-cols-4 gap-3">
@@ -63,7 +98,7 @@ const MoreTab = () => {
       {/* Menu Items */}
       <Card variant="elevated">
         <CardContent className="p-2">
-          {menuItems.map((item, index) => {
+          {menuItems.map((item) => {
             const Icon = item.icon;
             return (
               <button
@@ -92,10 +127,16 @@ const MoreTab = () => {
       </Card>
 
       {/* Logout */}
-      <Button variant="ghost" className="w-full text-destructive hover:text-destructive hover:bg-destructive/10">
-        <LogOut className="h-5 w-5" />
-        Sign Out
-      </Button>
+      {user && (
+        <Button 
+          variant="ghost" 
+          className="w-full text-destructive hover:text-destructive hover:bg-destructive/10"
+          onClick={handleSignOut}
+        >
+          <LogOut className="h-5 w-5" />
+          Sign Out
+        </Button>
+      )}
 
       {/* Version */}
       <p className="text-center text-xs text-muted-foreground">

@@ -6,10 +6,14 @@ import MedicineTab from "@/components/tabs/MedicineTab";
 import ConsultTab from "@/components/tabs/ConsultTab";
 import HospitalTab from "@/components/tabs/HospitalTab";
 import MoreTab from "@/components/tabs/MoreTab";
+import PhoneLogin from "@/components/auth/PhoneLogin";
+import ProfilePage from "@/components/profile/ProfilePage";
 import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("home");
+  const [showLogin, setShowLogin] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
   const { toast } = useToast();
 
   const handleSOS = () => {
@@ -19,6 +23,18 @@ const Index = () => {
       variant: "destructive",
     });
   };
+
+  const handleLoginSuccess = () => {
+    setShowLogin(false);
+    toast({
+      title: "Welcome!",
+      description: "You're now logged in. Complete your profile for better experience.",
+    });
+  };
+
+  if (showProfile) {
+    return <ProfilePage onBack={() => setShowProfile(false)} />;
+  }
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -31,7 +47,12 @@ const Index = () => {
       case "hospital":
         return <HospitalTab />;
       case "more":
-        return <MoreTab />;
+        return (
+          <MoreTab 
+            onLoginClick={() => setShowLogin(true)} 
+            onProfileClick={() => setShowProfile(true)} 
+          />
+        );
       default:
         return <HomeTab onSOS={handleSOS} />;
     }
@@ -64,6 +85,14 @@ const Index = () => {
       </main>
 
       <BottomNav activeTab={activeTab} onTabChange={setActiveTab} />
+
+      {/* Login Modal */}
+      {showLogin && (
+        <PhoneLogin 
+          onClose={() => setShowLogin(false)} 
+          onSuccess={handleLoginSuccess} 
+        />
+      )}
     </div>
   );
 };
