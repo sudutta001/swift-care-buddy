@@ -8,12 +8,18 @@ import HospitalTab from "@/components/tabs/HospitalTab";
 import MoreTab from "@/components/tabs/MoreTab";
 import PhoneLogin from "@/components/auth/PhoneLogin";
 import ProfilePage from "@/components/profile/ProfilePage";
+import CartPage from "@/components/cart/CartPage";
+import CheckoutPage from "@/components/cart/CheckoutPage";
+import OrderSuccessPage from "@/components/cart/OrderSuccessPage";
 import { useToast } from "@/hooks/use-toast";
+
+type ViewState = "main" | "profile" | "cart" | "checkout" | "order-success";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState("home");
   const [showLogin, setShowLogin] = useState(false);
-  const [showProfile, setShowProfile] = useState(false);
+  const [currentView, setCurrentView] = useState<ViewState>("main");
+  const [orderId, setOrderId] = useState<string>("");
   const { toast } = useToast();
 
   const handleSOS = () => {
@@ -32,8 +38,48 @@ const Index = () => {
     });
   };
 
-  if (showProfile) {
-    return <ProfilePage onBack={() => setShowProfile(false)} />;
+  const handleOrderPlaced = (newOrderId: string) => {
+    setOrderId(newOrderId);
+    setCurrentView("order-success");
+    toast({
+      title: "Order Placed!",
+      description: `Your order ${newOrderId} has been confirmed.`,
+    });
+  };
+
+  // Handle different views
+  if (currentView === "profile") {
+    return <ProfilePage onBack={() => setCurrentView("main")} />;
+  }
+
+  if (currentView === "cart") {
+    return (
+      <CartPage 
+        onBack={() => setCurrentView("main")} 
+        onCheckout={() => setCurrentView("checkout")} 
+      />
+    );
+  }
+
+  if (currentView === "checkout") {
+    return (
+      <CheckoutPage 
+        onBack={() => setCurrentView("cart")} 
+        onOrderPlaced={handleOrderPlaced} 
+      />
+    );
+  }
+
+  if (currentView === "order-success") {
+    return (
+      <OrderSuccessPage 
+        orderId={orderId} 
+        onBackToHome={() => {
+          setCurrentView("main");
+          setActiveTab("home");
+        }} 
+      />
+    );
   }
 
   const renderTabContent = () => {
@@ -41,7 +87,7 @@ const Index = () => {
       case "home":
         return <HomeTab onSOS={handleSOS} />;
       case "medicine":
-        return <MedicineTab />;
+        return <MedicineTab onCartClick={() => setCurrentView("cart")} />;
       case "consult":
         return <ConsultTab />;
       case "hospital":
@@ -50,7 +96,7 @@ const Index = () => {
         return (
           <MoreTab 
             onLoginClick={() => setShowLogin(true)} 
-            onProfileClick={() => setShowProfile(true)} 
+            onProfileClick={() => setCurrentView("profile")} 
           />
         );
       default:
