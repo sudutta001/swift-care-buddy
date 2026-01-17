@@ -11,11 +11,13 @@ import ProfilePage from "@/components/profile/ProfilePage";
 import CartPage from "@/components/cart/CartPage";
 import CheckoutPage from "@/components/cart/CheckoutPage";
 import OrderSuccessPage from "@/components/cart/OrderSuccessPage";
+import SplashScreen from "@/components/SplashScreen";
 import { useToast } from "@/hooks/use-toast";
 
 type ViewState = "main" | "profile" | "cart" | "checkout" | "order-success";
 
 const Index = () => {
+  const [showSplash, setShowSplash] = useState(true);
   const [activeTab, setActiveTab] = useState("home");
   const [showLogin, setShowLogin] = useState(false);
   const [currentView, setCurrentView] = useState<ViewState>("main");
@@ -46,6 +48,11 @@ const Index = () => {
       description: `Your order ${newOrderId} has been confirmed.`,
     });
   };
+
+  // Show splash screen
+  if (showSplash) {
+    return <SplashScreen onComplete={() => setShowSplash(false)} />;
+  }
 
   // Handle different views
   if (currentView === "profile") {
@@ -115,7 +122,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-24">
+    <div className="min-h-screen bg-background pb-24 animate-fade-in">
       <Header />
       
       {/* Page Title for non-home tabs */}
