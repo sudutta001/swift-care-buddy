@@ -245,6 +245,36 @@ const MedicineTab = ({ onCartClick }: MedicineTabProps) => {
           console.log("Extracted medicines:", medicines);
           toast.success("Medicines extracted! Review and add to cart.");
         }}
+        onAddToCart={(medicine) => {
+          // Find matching medicine in dummy data or create a placeholder
+          const matchedMedicine = dummyMedicines.find(m => 
+            m.name.toLowerCase().includes(medicine.name.toLowerCase()) ||
+            medicine.name.toLowerCase().includes(m.name.toLowerCase())
+          );
+          
+          if (matchedMedicine) {
+            addToCart({
+              id: matchedMedicine.id,
+              name: matchedMedicine.name,
+              genericName: matchedMedicine.genericName,
+              price: matchedMedicine.price,
+              mrp: matchedMedicine.mrp,
+              image: matchedMedicine.image,
+              unit: matchedMedicine.unit
+            });
+          } else {
+            // Add as a custom item with estimated price
+            addToCart({
+              id: `rx-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+              name: medicine.name,
+              genericName: medicine.genericName || "",
+              price: 99, // Default price for prescription items
+              mrp: 120,
+              image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=200&h=200&fit=crop",
+              unit: "As prescribed"
+            });
+          }
+        }}
       />
 
       {/* Floating Cart Button */}
