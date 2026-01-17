@@ -33,9 +33,10 @@ interface PrescriptionAnalysis {
 
 interface PrescriptionUploadProps {
   onMedicinesExtracted?: (medicines: Medicine[]) => void;
+  onAddToCart?: (medicine: { name: string; genericName?: string; price?: number }) => void;
 }
 
-const PrescriptionUpload = ({ onMedicinesExtracted }: PrescriptionUploadProps) => {
+const PrescriptionUpload = ({ onMedicinesExtracted, onAddToCart }: PrescriptionUploadProps) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState<PrescriptionAnalysis | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -283,7 +284,18 @@ const PrescriptionUpload = ({ onMedicinesExtracted }: PrescriptionUploadProps) =
                             <p className="text-xs text-muted-foreground mt-1 italic">{medicine.instructions}</p>
                           )}
                         </div>
-                        <Button size="sm" variant="outline" className="h-8 w-8 p-0 shrink-0">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="h-8 w-8 p-0 shrink-0"
+                          onClick={() => {
+                            onAddToCart?.({ 
+                              name: medicine.name, 
+                              genericName: medicine.genericName 
+                            });
+                            toast.success(`${medicine.name} added to cart`);
+                          }}
+                        >
                           <Plus className="h-4 w-4" />
                         </Button>
                       </div>
@@ -329,7 +341,20 @@ const PrescriptionUpload = ({ onMedicinesExtracted }: PrescriptionUploadProps) =
               <Button variant="outline" className="flex-1" onClick={clearAnalysis}>
                 Upload New
               </Button>
-              <Button className="flex-1">
+              <Button 
+                className="flex-1"
+                onClick={() => {
+                  if (analysis?.medicines) {
+                    analysis.medicines.forEach(medicine => {
+                      onAddToCart?.({ 
+                        name: medicine.name, 
+                        genericName: medicine.genericName 
+                      });
+                    });
+                    toast.success(`Added ${analysis.medicines.length} medicine(s) to cart`);
+                  }
+                }}
+              >
                 <ShoppingCart className="h-4 w-4 mr-2" />
                 Add All to Cart
               </Button>
